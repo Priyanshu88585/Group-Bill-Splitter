@@ -3,126 +3,378 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Group Bill Splitter - Priyanshu Version</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        .slide-in {
+            animation: slideIn 0.5s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.6s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .bounce-in {
+            animation: bounceIn 0.8s ease-out;
+        }
+        
+        @keyframes bounceIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.3);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.05);
+            }
+            70% {
+                transform: scale(0.9);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        .input-focus {
+            transition: all 0.3s ease;
+        }
+        
+        .input-focus:focus {
+            transform: scale(1.02);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-secondary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 20px rgba(240, 147, 251, 0.3);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-success:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 20px rgba(79, 172, 254, 0.3);
+        }
+        
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .progress-bar {
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            height: 4px;
+            border-radius: 2px;
+            transition: width 0.5s ease;
+        }
+        
+        .floating-label {
+            position: relative;
+        }
+        
+        .floating-label input:focus + label,
+        .floating-label input:not(:placeholder-shown) + label {
+            transform: translateY(-1.5rem) scale(0.85);
+            color: #667eea;
+        }
+        
+        .floating-label label {
+            position: absolute;
+            left: 0.75rem;
+            top: 0.75rem;
+            transition: all 0.3s ease;
+            pointer-events: none;
+            color: #6b7280;
+        }
+        
+        .category-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .category-badge:hover {
+            transform: scale(1.05);
+        }
+        
+        .table-row-hover:hover {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        }
+        
+        .success-animation {
+            animation: successPulse 0.6s ease-out;
+        }
+        
+        @keyframes successPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+    </style>
 </head>
 
-<body class="bg-gray-100 min-h-screen flex items-center justify-center p-5">
-
-    <main class="bg-white shadow-2xl rounded-xl p-8 w-full max-w-2xl space-y-6">
-
-        <!-- ====== Header ====== -->
-        <header>
-            <h1 class="text-2xl font-bold text-center text-orange-500">Group Bill Splitter</h1>
-        </header>
-
-        <!-- ====== Currency Selector ====== -->
-        <section>
-            <label class="block mb-1">Select Currency:</label>
-            <select id="currency" class="w-full border rounded-lg p-2">
-                <option value="₹">₹ - INR</option>
-                <option value="$">$ - USD</option>
-                <option value="€">€ - EUR</option>
-                <option value="£">£ - GBP</option>
-            </select>
-        </section>
-
-        <!-- ====== People Count Input ====== -->
-        <section>
-            <label class="block mb-1 mt-3">How many people?</label>
-            <input id="peopleCount" type="number" min="1" class="w-full border rounded-lg p-2" placeholder="e.g. 3">
-            <button onclick="generateNameInputs()"
-                class="bg-orange-500 hover:bg-orange-600 text-white rounded-lg px-4 py-2 w-full mt-2">Next</button>
-        </section>
-
-        <!-- ====== Names Input ====== -->
-        <section>
-            <form id="namesForm" class="space-y-3 hidden">
-                <div id="nameFields" class="space-y-3"></div>
-                <button type="button" onclick="generatePurposeInputs()"
-                    class="bg-blue-500 hover:bg-blue-600 text-white rounded-lg px-4 py-2 w-full">Next</button>
-            </form>
-        </section>
-
-        <!-- ====== Purpose Input ====== -->
-        <section>
-            <form id="paymentForm" class="space-y-3 hidden">
-                <div class="flex justify-between items-center">
-                    <label class="block font-semibold text-lg">Enter Purpose, Category & Payments</label>
-                </div>
-                <div id="purposeFields" class="space-y-3"></div>
-
-                 <!-- ====== Buttons in Same Line ====== -->
-                <div class="flex justify-between items-center">
-                    <button type="button" onclick="showResult()"class="bg-green-500 hover:bg-green-600 text-white rounded-lg px-4 py-2 flex-1 mr-2">Show Result</button>
-                    <button type="button" onclick="addPurposeBox()"class="bg-gray-200 hover:bg-gray-300 text-black rounded-full w-10 h-10 flex items-center justify-center text-xl">+</button>
-                </div>
-            </form>
-        </section>
-
-
-        <!-- ====== Result ====== -->
-        <section id="result" class="hidden space-y-3">
-            <h2 class="text-xl font-bold text-center text-green-600">Final Settlement</h2>
-
-            <div class="flex justify-between items-center">
-                <div id="totalPaid" class="text-left"></div>
-                <select id="categoryFilter" onchange="calculateSettlement()" class="border p-2 rounded-lg">
-                    <option value="all">All Categories</option>
-                </select>
+<body class="gradient-bg min-h-screen flex items-center justify-center p-4">
+    <div class="w-full max-w-4xl">
+        <!-- Progress Bar -->
+        <div class="mb-8">
+            <div class="bg-white/20 rounded-full h-2 overflow-hidden">
+                <div id="progressBar" class="progress-bar" style="width: 25%"></div>
             </div>
-
-            <table class="w-full text-sm border mt-4" id="settlementTable">
-                <thead class="bg-gray-200">
-                    <tr>
-                        <th class="border p-2">Person</th>
-                        <th class="border p-2">Paid</th>
-                        <th class="border p-2">Share</th>
-                        <th class="border p-2">Balance</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-
-            <h3 class="text-lg font-semibold text-center mt-6">Who Owes Whom</h3>
-            <ul id="owedList" class="list-disc list-inside text-sm"></ul>
-        </section>
-
-        <!-- ====== Action Buttons ====== -->
-        <footer id="actionButtons" class="hidden flex justify-between pt-4 relative">
-            <div class="relative">
-                <button onclick="toggleDropdown('downloadMenu')"
-                    class="bg-blue-500 hover:bg-blue-600 text-white rounded-lg px-4 py-2">Download ▼</button>
-                <div id="downloadMenu"
-                    class="absolute bottom-full mb-2 hidden bg-white border rounded-lg shadow-lg z-10">
-                    <button onclick="downloadCSV()" class="block px-4 py-2 hover:bg-gray-100 w-full text-left">CSV</button>
-                    <button onclick="downloadPDF()" class="block px-4 py-2 hover:bg-gray-100 w-full text-left">PDF</button>
-                </div>
+            <div class="flex justify-between text-white text-sm mt-2">
+                <span>Step 1: Setup</span>
+                <span>Step 2: Names</span>
+                <span>Step 3: Expenses</span>
+                <span>Step 4: Results</span>
             </div>
+        </div>
 
-            <div class="relative">
-                <button onclick="toggleDropdown('shareMenu')"
-                    class="bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg px-4 py-2">Share ▼</button>
-                <div id="shareMenu"
-                    class="absolute bottom-full mb-2 left-1/2 transform -translate-x-[60%] hidden bg-white border rounded-lg shadow-lg z-10 w-56 p-4 space-y-3">
-                    <button onclick="generateShareLink()" class="block w-full text-left text-black hover:underline">Copy
-                        Share Link</button>
-                    <button onclick="showQRCode()" class="block w-full text-left text-black hover:underline">Show
-                        QR</button>
-                    <canvas id="qrCodeCanvas" class="mx-auto hidden mt-3"></canvas>
+        <main class="glass-effect shadow-2xl rounded-2xl p-8 space-y-8 slide-in">
+            <!-- Header -->
+            <header class="text-center">
+                <div class="flex items-center justify-center mb-4">
+                    <i class="fas fa-receipt text-4xl text-purple-500 mr-4"></i>
+                    <h1 class="text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+                        Group Bill Splitter
+                    </h1>
                 </div>
-            </div>
-        </footer>
+                <p class="text-gray-600 text-lg">Split bills fairly with friends and family</p>
+            </header>
 
-    </main>
+            <!-- Currency Selector -->
+            <section class="fade-in">
+                <div class="floating-label">
+                    <select id="currency" class="w-full border-2 border-gray-200 rounded-xl p-4 text-lg input-focus focus:border-purple-500 focus:outline-none appearance-none bg-white">
+                        <option value="₹">₹ - Indian Rupee (INR)</option>
+                        <option value="$">$ - US Dollar (USD)</option>
+                        <option value="€">€ - Euro (EUR)</option>
+                        <option value="£">£ - British Pound (GBP)</option>
+                        <option value="¥">¥ - Japanese Yen (JPY)</option>
+                        <option value="₿">₿ - Bitcoin (BTC)</option>
+                    </select>
+                    <label class="absolute left-4 top-4 text-gray-500">
+                        <i class="fas fa-coins mr-2"></i>Select Currency
+                    </label>
+                </div>
+            </section>
 
-    <!-- ====== Developed & Customized by PRIYANSHU KESHARWANI ====== -->
+            <!-- People Count Input -->
+            <section class="fade-in">
+                <div class="floating-label">
+                    <input id="peopleCount" type="number" min="1" max="20" 
+                           class="w-full border-2 border-gray-200 rounded-xl p-4 text-lg input-focus focus:border-purple-500 focus:outline-none" 
+                           placeholder=" ">
+                    <label class="absolute left-4 top-4 text-gray-500">
+                        <i class="fas fa-users mr-2"></i>How many people?
+                    </label>
+                </div>
+                <button onclick="generateNameInputs()" 
+                        class="btn-primary text-white rounded-xl px-8 py-4 w-full mt-4 text-lg font-semibold">
+                    <i class="fas fa-arrow-right mr-2"></i>Continue
+                </button>
+            </section>
+
+            <!-- Names Input -->
+            <section>
+                <form id="namesForm" class="space-y-4 hidden fade-in">
+                    <h3 class="text-2xl font-semibold text-gray-800 mb-4">
+                        <i class="fas fa-user-friends mr-2 text-purple-500"></i>Enter Names
+                    </h3>
+                    <div id="nameFields" class="space-y-4"></div>
+                    <button type="button" onclick="generatePurposeInputs()" 
+                            class="btn-secondary text-white rounded-xl px-8 py-4 w-full text-lg font-semibold">
+                        <i class="fas fa-arrow-right mr-2"></i>Next Step
+                    </button>
+                </form>
+            </section>
+
+            <!-- Purpose Input -->
+            <section>
+                <form id="paymentForm" class="space-y-6 hidden fade-in">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-2xl font-semibold text-gray-800">
+                            <i class="fas fa-receipt mr-2 text-purple-500"></i>Add Expenses
+                        </h3>
+                        <button type="button" onclick="addPurposeBox()" 
+                                class="bg-gradient-to-r from-green-400 to-blue-500 hover:from-green-500 hover:to-blue-600 text-white rounded-full w-12 h-12 flex items-center justify-center text-xl transition-all duration-300 hover:scale-110">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                    <div id="purposeFields" class="space-y-6"></div>
+                    
+                    <div class="flex gap-4">
+                        <button type="button" onclick="showResult()" 
+                                class="btn-success text-white rounded-xl px-8 py-4 flex-1 text-lg font-semibold">
+                            <i class="fas fa-calculator mr-2"></i>Calculate Settlement
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Result -->
+            <section id="result" class="hidden space-y-6 bounce-in">
+                <div class="text-center">
+                    <i class="fas fa-check-circle text-6xl text-green-500 mb-4"></i>
+                    <h2 class="text-3xl font-bold text-gray-800 mb-2">Final Settlement</h2>
+                    <p class="text-gray-600">Here's how to settle your group expenses</p>
+                </div>
+
+                <div class="flex justify-between items-center bg-gradient-to-r from-purple-50 to-blue-50 p-6 rounded-xl">
+                    <div id="totalPaid" class="text-lg"></div>
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-filter text-purple-500"></i>
+                        <select id="categoryFilter" onchange="calculateSettlement()" 
+                                class="border-2 border-purple-200 p-3 rounded-lg focus:border-purple-500 focus:outline-none">
+                            <option value="all">All Categories</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl overflow-hidden shadow-lg">
+                    <table class="w-full text-sm" id="settlementTable">
+                        <thead class="bg-gradient-to-r from-purple-500 to-blue-500 text-white">
+                            <tr>
+                                <th class="p-4 text-left font-semibold">Person</th>
+                                <th class="p-4 text-left font-semibold">Paid</th>
+                                <th class="p-4 text-left font-semibold">Share</th>
+                                <th class="p-4 text-left font-semibold">Balance</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200"></tbody>
+                    </table>
+                </div>
+
+                <div class="bg-gradient-to-r from-green-50 to-blue-50 p-6 rounded-xl">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                        <i class="fas fa-handshake mr-2 text-green-500"></i>Who Owes Whom
+                    </h3>
+                    <ul id="owedList" class="space-y-2 text-gray-700"></ul>
+                </div>
+            </section>
+
+            <!-- Action Buttons -->
+            <footer id="actionButtons" class="hidden flex justify-between pt-6 gap-4">
+                <div class="relative flex-1">
+                    <button onclick="toggleDropdown('downloadMenu')" 
+                            class="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white rounded-xl px-6 py-4 font-semibold transition-all duration-300 hover:scale-105">
+                        <i class="fas fa-download mr-2"></i>Download ▼
+                    </button>
+                    <div id="downloadMenu" 
+                         class="absolute bottom-full mb-2 left-0 right-0 hidden bg-white border rounded-xl shadow-xl z-10 overflow-hidden">
+                        <button onclick="downloadCSV()" 
+                                class="block px-6 py-3 hover:bg-gray-50 w-full text-left transition-colors duration-200">
+                            <i class="fas fa-file-csv mr-2 text-green-500"></i>Download as CSV
+                        </button>
+                        <button onclick="downloadPDF()" 
+                                class="block px-6 py-3 hover:bg-gray-50 w-full text-left transition-colors duration-200">
+                            <i class="fas fa-file-pdf mr-2 text-red-500"></i>Download as PDF
+                        </button>
+                    </div>
+                </div>
+
+                <div class="relative flex-1">
+                    <button onclick="toggleDropdown('shareMenu')" 
+                            class="w-full bg-gradient-to-r from-yellow-500 to-orange-600 hover:from-yellow-600 hover:to-orange-700 text-white rounded-xl px-6 py-4 font-semibold transition-all duration-300 hover:scale-105">
+                        <i class="fas fa-share-alt mr-2"></i>Share ▼
+                    </button>
+                    <div id="shareMenu" 
+                         class="absolute bottom-full mb-2 left-0 right-0 hidden bg-white border rounded-xl shadow-xl z-10 p-4 space-y-3">
+                        <button onclick="generateShareLink()" 
+                                class="block w-full text-left text-gray-700 hover:text-purple-600 transition-colors duration-200 p-2 rounded-lg hover:bg-purple-50">
+                            <i class="fas fa-link mr-2"></i>Copy Share Link
+                        </button>
+                        <button onclick="showQRCode()" 
+                                class="block w-full text-left text-gray-700 hover:text-purple-600 transition-colors duration-200 p-2 rounded-lg hover:bg-purple-50">
+                            <i class="fas fa-qrcode mr-2"></i>Show QR Code
+                        </button>
+                        <canvas id="qrCodeCanvas" class="mx-auto hidden mt-3 border rounded-lg"></canvas>
+                    </div>
+                </div>
+            </footer>
+        </main>
+
+        <!-- Footer Credit -->
+        <div class="text-center mt-8 text-white/80">
+            <p class="text-sm">
+                <i class="fas fa-heart text-red-400 mr-1"></i>
+                Developed & Customized by <span class="font-semibold">PRIYANSHU KESHARWANI</span>
+            </p>
+        </div>
+    </div>
 
     <script>
         let names = [];
         let currentShareLink = "";
+        let currentStep = 1;
+
+        function updateProgress(step) {
+            const progress = (step / 4) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+            currentStep = step;
+        }
 
         function toggleDropdown(id) {
             document.getElementById('downloadMenu').classList.add('hidden');
@@ -132,48 +384,95 @@
 
         function generateNameInputs() {
             const count = parseInt(document.getElementById('peopleCount').value);
+            if (!count || count < 1 || count > 20) {
+                alert('Please enter a valid number of people (1-20)');
+                return;
+            }
+            
             const nameFields = document.getElementById('nameFields');
             nameFields.innerHTML = '';
+            
             for (let i = 0; i < count; i++) {
-                nameFields.innerHTML += `<input type="text" class="w-full border rounded-lg p-2" placeholder="Person ${i + 1} Name" required>`;
+                const inputGroup = document.createElement('div');
+                inputGroup.className = 'floating-label';
+                inputGroup.innerHTML = `
+                    <input type="text" class="w-full border-2 border-gray-200 rounded-xl p-4 text-lg input-focus focus:border-purple-500 focus:outline-none" 
+                           placeholder=" " required>
+                    <label class="absolute left-4 top-4 text-gray-500">
+                        <i class="fas fa-user mr-2"></i>Person ${i + 1} Name
+                    </label>
+                `;
+                nameFields.appendChild(inputGroup);
             }
+            
             document.getElementById('namesForm').classList.remove('hidden');
+            updateProgress(2);
         }
 
         function generatePurposeInputs() {
             const inputs = document.querySelectorAll('#nameFields input');
             names = [];
             inputs.forEach(input => names.push(input.value.trim() || "Unnamed Person"));
+            
             document.getElementById('purposeFields').innerHTML = '';
             addPurposeBox();
             document.getElementById('paymentForm').classList.remove('hidden');
+            updateProgress(3);
         }
 
         function addPurposeBox() {
             const purposeFields = document.getElementById('purposeFields');
             const box = document.createElement('div');
-            box.className = "border rounded-lg p-3 bg-gray-50";
+            box.className = "bg-gradient-to-r from-gray-50 to-blue-50 border-2 border-gray-200 rounded-xl p-6 card-hover";
 
-            let html = `<div class="flex items-center mb-2">
-            <input type="text" class="flex-1 border rounded-lg p-2 mr-2 purpose" placeholder="Purpose e.g. Food, Travel" required>
-            <select class="category border rounded-lg p-2 mr-2">
-                <option value="Food">Food 🍽️</option>
-                <option value="Travel">Travel 🚗</option>
-                <option value="Shopping">Shopping 🛍️</option>
-                <option value="Hotel">Hotel 🏨</option>
-                <option value="Other">Other ✏️</option>
-            </select>
-            <button type="button" onclick="removePurpose(this)" class="text-red-500 hover:text-red-700 text-xl">🗑️</button>
-            </div><div class="grid grid-cols-${names.length} gap-2">`;
+            let html = `
+                <div class="flex items-center mb-4">
+                    <div class="flex-1 mr-4">
+                        <input type="text" class="w-full border-2 border-gray-200 rounded-lg p-3 purpose input-focus focus:border-purple-500 focus:outline-none" 
+                               placeholder="Purpose e.g. Food, Travel" required>
+                    </div>
+                    <div class="mr-4">
+                        <select class="category border-2 border-gray-200 rounded-lg p-3 focus:border-purple-500 focus:outline-none">
+                            <option value="Food">🍽️ Food</option>
+                            <option value="Travel">🚗 Travel</option>
+                            <option value="Shopping">🛍️ Shopping</option>
+                            <option value="Hotel">🏨 Hotel</option>
+                            <option value="Entertainment">🎬 Entertainment</option>
+                            <option value="Other">✏️ Other</option>
+                        </select>
+                    </div>
+                    <button type="button" onclick="removePurpose(this)" 
+                            class="text-red-500 hover:text-red-700 text-xl transition-colors duration-200">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-${Math.min(names.length, 4)} gap-3 mb-4">`;
 
             names.forEach(name => {
-                html += `<input type="number" class="w-full border rounded-lg p-2 amount" placeholder="${name} paid" required>`;
+                html += `
+                    <div class="floating-label">
+                        <input type="number" step="0.01" class="w-full border-2 border-gray-200 rounded-lg p-3 amount input-focus focus:border-purple-500 focus:outline-none" 
+                               placeholder=" " required>
+                        <label class="absolute left-3 top-3 text-gray-500 text-sm">${name} paid</label>
+                    </div>`;
             });
 
-            html += `</div><div class="mb-2"><label class="font-semibold">Who is involved?</label><div class="grid grid-cols-2 md:grid-cols-4 gap-2 mt-1 involved">`;
+            html += `</div>
+                <div class="mb-4">
+                    <label class="font-semibold text-gray-700 mb-2 block">
+                        <i class="fas fa-users mr-2"></i>Who is involved?
+                    </label>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 involved">`;
+            
             names.forEach((name, idx) => {
-                html += `<label class="flex items-center space-x-1"><input type="checkbox" data-idx="${idx}" checked> ${name}</label>`;
+                html += `
+                    <label class="flex items-center space-x-2 p-2 rounded-lg hover:bg-white transition-colors duration-200">
+                        <input type="checkbox" data-idx="${idx}" checked class="rounded text-purple-500 focus:ring-purple-500">
+                        <span class="text-sm">${name}</span>
+                    </label>`;
             });
+
+            html += `</div></div>`;
 
             box.innerHTML = html;
             purposeFields.appendChild(box);
@@ -181,7 +480,7 @@
         }
 
         function removePurpose(btn) {
-            btn.closest('.border').remove();
+            btn.closest('.bg-gradient-to-r').remove();
             updateCategoryFilter();
             calculateSettlement();
         }
@@ -192,13 +491,22 @@
             const unique = [...new Set(categories)];
             filter.innerHTML = `<option value="all">All Categories</option>`;
             unique.forEach(c => {
-                filter.innerHTML += `<option value="${c}">${c}</option>`;
+                const emoji = {
+                    'Food': '🍽️',
+                    'Travel': '🚗',
+                    'Shopping': '🛍️',
+                    'Hotel': '🏨',
+                    'Entertainment': '🎬',
+                    'Other': '✏️'
+                }[c] || '📁';
+                filter.innerHTML += `<option value="${c}">${emoji} ${c}</option>`;
             });
         }
 
         function showResult() {
             document.getElementById('result').classList.remove('hidden');
             document.getElementById('actionButtons').classList.remove('hidden');
+            updateProgress(4);
             calculateSettlement();
         }
 
@@ -222,7 +530,11 @@
             const tbody = document.querySelector('#settlementTable tbody');
             tbody.innerHTML = '';
             const totalAllPaid = totals.reduce((a, b) => a + b, 0);
-            document.getElementById('totalPaid').innerHTML = `<p>Total Paid: <strong>${currency}${totalAllPaid.toFixed(2)}</strong></p>`;
+            
+            document.getElementById('totalPaid').innerHTML = `
+                <div class="text-2xl font-bold text-gray-800">
+                    Total Paid: <span class="text-purple-600">${currency}${totalAllPaid.toFixed(2)}</span>
+                </div>`;
 
             let balances = [];
             names.forEach((name, idx) => {
@@ -230,8 +542,20 @@
                 balances.push({ name: name, amount: diff });
                 const bal = diff > 0 ? `+${diff.toFixed(2)}` : diff < 0 ? `-${Math.abs(diff).toFixed(2)}` : '0';
                 const status = diff > 0 ? '(Gets)' : diff < 0 ? '(Owes)' : '(Settled)';
-                const color = diff > 0 ? 'text-green-700' : diff < 0 ? 'text-red-700' : 'text-gray-600';
-                tbody.innerHTML += `<tr><td class="border p-2">${name}</td><td class="border p-2">${currency}${totals[idx].toFixed(2)}</td><td class="border p-2">${currency}${shares[idx].toFixed(2)}</td><td class="border p-2 ${color}">${currency}${bal} ${status}</td></tr>`;
+                const color = diff > 0 ? 'text-green-600' : diff < 0 ? 'text-red-600' : 'text-gray-600';
+                const bgColor = diff > 0 ? 'bg-green-50' : diff < 0 ? 'bg-red-50' : 'bg-gray-50';
+                
+                tbody.innerHTML += `
+                    <tr class="table-row-hover">
+                        <td class="p-4 font-medium">${name}</td>
+                        <td class="p-4">${currency}${totals[idx].toFixed(2)}</td>
+                        <td class="p-4">${currency}${shares[idx].toFixed(2)}</td>
+                        <td class="p-4">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${bgColor} ${color}">
+                                ${currency}${bal} ${status}
+                            </span>
+                        </td>
+                    </tr>`;
             });
 
             calculateOwed(balances, currency);
@@ -249,7 +573,13 @@
                 for (let i = 0; i < creditors.length && owe > 0; i++) {
                     if (creditors[i].amount === 0) continue;
                     let pay = Math.min(owe, creditors[i].amount);
-                    owedList.innerHTML += `<li>${debtor.name} owes ${currency}${pay.toFixed(2)} to ${creditors[i].name}</li>`;
+                    owedList.innerHTML += `
+                        <li class="flex items-center p-3 bg-white rounded-lg shadow-sm">
+                            <i class="fas fa-arrow-right text-red-500 mr-3"></i>
+                            <span class="font-medium">${debtor.name}</span> owes 
+                            <span class="font-bold text-red-600 mx-1">${currency}${pay.toFixed(2)}</span> 
+                            to <span class="font-medium">${creditors[i].name}</span>
+                        </li>`;
                     owe -= pay;
                     creditors[i].amount -= pay;
                 }
@@ -274,7 +604,7 @@
             });
             csv += "\n=== Final Settlement ===\nName,Paid,Share,Balance\n";
             document.querySelectorAll('#settlementTable tbody tr').forEach(row => {
-                csv += [...row.children].map(td => td.textContent).join(",") + "\n";
+                csv += [...row.children].map(td => td.textContent.replace(/\s*\([^)]*\)/g, '')).join(",") + "\n";
             });
             const blob = new Blob([csv], { type: 'text/csv' });
             const link = document.createElement('a');
@@ -287,17 +617,17 @@
             const currency = document.getElementById('currency').value;
             const element = document.createElement('div');
             element.style.padding = "20px";
-            element.style.fontFamily = "Arial, sans-serif";
+            element.style.fontFamily = "Inter, sans-serif";
             element.style.fontSize = "12px";
             let purposeTable = `
-            <h3 style="margin-bottom:10px;">Purpose Summary</h3>
+            <h3 style="margin-bottom:10px; color: #667eea;">Purpose Summary</h3>
             <table style="width:100%; border-collapse:collapse; margin-bottom:20px;">
                 <thead>
-                    <tr style="background:#f3f4f6;">
-                        <th style="border:1px solid #ccc; padding:6px;">Purpose</th>
-                        <th style="border:1px solid #ccc; padding:6px;">Category</th>
-                        <th style="border:1px solid #ccc; padding:6px;">Paid By</th>
-                        <th style="border:1px solid #ccc; padding:6px;">Who is Involved</th>
+                    <tr style="background:linear-gradient(135deg, #667eea 0%, #764ba2 100%); color:white;">
+                        <th style="border:1px solid #ccc; padding:8px;">Purpose</th>
+                        <th style="border:1px solid #ccc; padding:8px;">Category</th>
+                        <th style="border:1px solid #ccc; padding:8px;">Paid By</th>
+                        <th style="border:1px solid #ccc; padding:8px;">Who is Involved</th>
                     </tr>
                 </thead>
                 <tbody>`;
@@ -314,32 +644,32 @@
                 paidBy = paidBy.slice(0, -2);
                 let involved = [...p.querySelectorAll('.involved input')].filter(c => c.checked).map(c => names[c.dataset.idx]).join(", ");
                 purposeTable += `<tr>
-                    <td style="border:1px solid #ccc; padding:6px;">${purpose}</td>
-                    <td style="border:1px solid #ccc; padding:6px;">${category}</td>
-                    <td style="border:1px solid #ccc; padding:6px;">${paidBy}</td>
-                    <td style="border:1px solid #ccc; padding:6px;">${involved}</td>
+                    <td style="border:1px solid #ccc; padding:8px;">${purpose}</td>
+                    <td style="border:1px solid #ccc; padding:8px;">${category}</td>
+                    <td style="border:1px solid #ccc; padding:8px;">${paidBy}</td>
+                    <td style="border:1px solid #ccc; padding:8px;">${involved}</td>
                 </tr>`;
             });
             purposeTable += `</tbody></table>`;
             element.innerHTML = `
-                <h2 style="text-align:center; color:#16a34a; font-size:20px; margin-bottom:10px;">Group Bill Settlement Report</h2>
-                <p style="text-align:center; margin-bottom:20px;">Currency: ${currency}</p>
+                <h2 style="text-align:center; background:linear-gradient(135deg, #667eea 0%, #764ba2 100%); color:white; padding:15px; border-radius:10px; margin-bottom:20px;">Group Bill Settlement Report</h2>
+                <p style="text-align:center; margin-bottom:20px; color: #667eea; font-weight:bold;">Currency: ${currency}</p>
                 ${purposeTable}
-                <h3 style="margin-bottom:10px;">Final Settlement</h3>
+                <h3 style="margin-bottom:10px; color: #667eea;">Final Settlement</h3>
                 <table style="width:100%; border-collapse:collapse; margin-bottom:20px;">
                     <thead>
-                        <tr style="background:#f3f4f6;">
-                            <th style="border:1px solid #ccc; padding:8px;">Person</th>
-                            <th style="border:1px solid #ccc; padding:8px;">Paid</th>
-                            <th style="border:1px solid #ccc; padding:8px;">Share</th>
-                            <th style="border:1px solid #ccc; padding:8px;">Balance</th>
+                        <tr style="background:linear-gradient(135deg, #667eea 0%, #764ba2 100%); color:white;">
+                            <th style="border:1px solid #ccc; padding:10px;">Person</th>
+                            <th style="border:1px solid #ccc; padding:10px;">Paid</th>
+                            <th style="border:1px solid #ccc; padding:10px;">Share</th>
+                            <th style="border:1px solid #ccc; padding:10px;">Balance</th>
                         </tr>
                     </thead>
                     <tbody>
                         ${document.querySelector('#settlementTable tbody').innerHTML}
                     </tbody>
                 </table>
-                <h3 style="margin-bottom:10px;">Who Owes Whom:</h3>
+                <h3 style="margin-bottom:10px; color: #667eea;">Who Owes Whom:</h3>
                 <ul style="padding-left:15px;">
                     ${document.getElementById('owedList').innerHTML}
                 </ul>`;
@@ -355,8 +685,17 @@
 
         function generateShareLink() {
             const link = window.location.href;
-            navigator.clipboard.writeText(link);
-            alert('Link copied to clipboard!');
+            navigator.clipboard.writeText(link).then(() => {
+                // Show success message
+                const button = event.target;
+                const originalText = button.innerHTML;
+                button.innerHTML = '<i class="fas fa-check mr-2"></i>Copied!';
+                button.classList.add('success-animation');
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                    button.classList.remove('success-animation');
+                }, 2000);
+            });
         }
 
         function showQRCode() {
@@ -364,11 +703,14 @@
             const qr = new QRious({
                 element: canvas,
                 value: window.location.href,
-                size: 150
+                size: 200,
+                background: 'white',
+                foreground: '#667eea'
             });
             canvas.classList.remove('hidden');
         }
 
+        // Close dropdowns when clicking outside
         document.addEventListener('click', function (event) {
             if (!event.target.closest('#downloadMenu') &&
                 !event.target.closest('#shareMenu') &&
@@ -376,8 +718,10 @@
                 document.getElementById('downloadMenu').classList.add('hidden');
                 document.getElementById('shareMenu').classList.add('hidden');
             }
-        }
-);
+        });
+
+        // Initialize progress
+        updateProgress(1);
     </script>
 </body>
 
