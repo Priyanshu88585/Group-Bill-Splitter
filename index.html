@@ -3,126 +3,377 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Group Bill Splitter - Priyanshu Version</title>
+    <title>Group Bill Splitter - Enhanced UI</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .dark .gradient-bg {
+            background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
+        }
+        .dark {
+            color-scheme: dark;
+        }
+        .card-shadow {
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+        .input-focus {
+            transition: all 0.3s ease;
+        }
+        .input-focus:focus {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        .btn-hover {
+            transition: all 0.3s ease;
+        }
+        .btn-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .slide-in {
+            animation: slideIn 0.5s ease-out;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .pulse-button {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(99, 102, 241, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); }
+        }
+        @media (max-width: 640px) {
+            .card-shadow {
+                box-shadow: 0 10px 25px -12px rgba(0, 0, 0, 0.25);
+            }
+            main {
+                margin: 1rem;
+                padding: 1.5rem;
+            }
+            .text-4xl {
+                font-size: 2rem;
+            }
+            .grid-cols-3 {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+    </style>
 </head>
 
-<body class="bg-gray-100 min-h-screen flex items-center justify-center p-5">
+<body class="gradient-bg min-h-screen flex items-center justify-center p-5">
 
-    <main class="bg-white shadow-2xl rounded-xl p-8 w-full max-w-2xl space-y-6">
+    <main class="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm card-shadow rounded-2xl p-8 w-full max-w-2xl space-y-8 fade-in">
 
         <!-- ====== Header ====== -->
-        <header>
-            <h1 class="text-2xl font-bold text-center text-orange-500">Group Bill Splitter</h1>
+        <header class="text-center relative">
+            <button onclick="toggleDarkMode()" 
+                    class="absolute top-0 right-0 p-2 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 transition-colors duration-200"
+                    id="darkModeToggle">
+                <i class="fas fa-moon text-gray-600 dark:text-gray-300"></i>
+            </button>
+            
+            <div class="flex items-center justify-center mb-4">
+                <i class="fas fa-receipt text-4xl text-indigo-600 mr-3"></i>
+                <h1 class="text-4xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                    Group Bill Splitter
+                </h1>
+            </div>
+            <p class="text-gray-600 dark:text-gray-300 text-lg">Split expenses effortlessly with your friends</p>
         </header>
 
         <!-- ====== Currency Selector ====== -->
-        <section>
-            <label class="block mb-1">Select Currency:</label>
-            <select id="currency" class="w-full border rounded-lg p-2">
-                <option value="₹">₹ - INR</option>
-                <option value="$">$ - USD</option>
-                <option value="€">€ - EUR</option>
-                <option value="£">£ - GBP</option>
-            </select>
+        <section class="slide-in">
+            <label class="block mb-3 text-sm font-semibold text-gray-700 flex items-center">
+                <i class="fas fa-coins text-indigo-600 mr-2"></i>
+                Select Currency:
+            </label>
+            <div class="relative">
+                <select id="currency" class="w-full border-2 border-gray-200 rounded-xl p-4 input-focus bg-white text-gray-700 font-medium appearance-none cursor-pointer">
+                    <option value="₹">₹ - Indian Rupee (INR)</option>
+                    <option value="$">$ - US Dollar (USD)</option>
+                    <option value="€">€ - Euro (EUR)</option>
+                    <option value="£">£ - British Pound (GBP)</option>
+                </select>
+                <i class="fas fa-chevron-down absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+            </div>
         </section>
 
         <!-- ====== People Count Input ====== -->
-        <section>
-            <label class="block mb-1 mt-3">How many people?</label>
-            <input id="peopleCount" type="number" min="1" class="w-full border rounded-lg p-2" placeholder="e.g. 3">
+        <section class="slide-in">
+            <label class="block mb-3 text-sm font-semibold text-gray-700 flex items-center">
+                <i class="fas fa-users text-indigo-600 mr-2"></i>
+                How many people are splitting the bill?
+            </label>
+            <div class="relative mb-4">
+                <input id="peopleCount" type="number" min="1" max="20" 
+                       class="w-full border-2 border-gray-200 rounded-xl p-4 pl-12 input-focus bg-white text-gray-700 font-medium" 
+                       placeholder="Enter number of people (e.g. 3)">
+                <i class="fas fa-hashtag absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+            </div>
             <button onclick="generateNameInputs()"
-                class="bg-orange-500 hover:bg-orange-600 text-white rounded-lg px-4 py-2 w-full mt-2">Next</button>
+                class="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-xl px-6 py-4 w-full font-semibold text-lg btn-hover pulse-button">
+                <i class="fas fa-arrow-right mr-2"></i>
+                Continue to Names
+            </button>
         </section>
 
         <!-- ====== Names Input ====== -->
         <section>
-            <form id="namesForm" class="space-y-3 hidden">
-                <div id="nameFields" class="space-y-3"></div>
+            <form id="namesForm" class="space-y-6 hidden fade-in">
+                <div class="mb-4">
+                    <label class="block mb-3 text-sm font-semibold text-gray-700 flex items-center">
+                        <i class="fas fa-user-friends text-indigo-600 mr-2"></i>
+                        Enter names of all participants:
+                    </label>
+                </div>
+                <div id="nameFields" class="space-y-4"></div>
                 <button type="button" onclick="generatePurposeInputs()"
-                    class="bg-blue-500 hover:bg-blue-600 text-white rounded-lg px-4 py-2 w-full">Next</button>
+                    class="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-xl px-6 py-4 w-full font-semibold text-lg btn-hover">
+                    <i class="fas fa-arrow-right mr-2"></i>
+                    Continue to Expenses
+                </button>
             </form>
         </section>
 
         <!-- ====== Purpose Input ====== -->
         <section>
-            <form id="paymentForm" class="space-y-3 hidden">
+            <form id="paymentForm" class="space-y-6 hidden fade-in">
                 <div class="flex justify-between items-center">
-                    <label class="block font-semibold text-lg">Enter Purpose, Category & Payments</label>
+                    <label class="block font-semibold text-lg text-gray-700 flex items-center">
+                        <i class="fas fa-receipt text-indigo-600 mr-2"></i>
+                        Enter Expenses & Payments
+                    </label>
                 </div>
-                <div id="purposeFields" class="space-y-3"></div>
+                <div id="purposeFields" class="space-y-6"></div>
 
                  <!-- ====== Buttons in Same Line ====== -->
-                <div class="flex justify-between items-center">
-                    <button type="button" onclick="showResult()"class="bg-green-500 hover:bg-green-600 text-white rounded-lg px-4 py-2 flex-1 mr-2">Show Result</button>
-                    <button type="button" onclick="addPurposeBox()"class="bg-gray-200 hover:bg-gray-300 text-black rounded-full w-10 h-10 flex items-center justify-center text-xl">+</button>
+                <div class="flex justify-between items-center gap-4">
+                    <button type="button" onclick="showResult()"
+                        class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-xl px-6 py-4 flex-1 font-semibold text-lg btn-hover">
+                        <i class="fas fa-calculator mr-2"></i>
+                        Calculate Split
+                    </button>
+                    <button type="button" onclick="addPurposeBox()"
+                        class="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white rounded-full w-14 h-14 flex items-center justify-center text-xl btn-hover shadow-lg">
+                        <i class="fas fa-plus"></i>
+                    </button>
                 </div>
             </form>
         </section>
 
 
         <!-- ====== Result ====== -->
-        <section id="result" class="hidden space-y-3">
-            <h2 class="text-xl font-bold text-center text-green-600">Final Settlement</h2>
-
-            <div class="flex justify-between items-center">
-                <div id="totalPaid" class="text-left"></div>
-                <select id="categoryFilter" onchange="calculateSettlement()" class="border p-2 rounded-lg">
-                    <option value="all">All Categories</option>
-                </select>
+        <section id="result" class="hidden space-y-6 fade-in">
+            <div class="text-center">
+                <h2 class="text-3xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent mb-2">
+                    <i class="fas fa-chart-pie mr-2"></i>
+                    Final Settlement
+                </h2>
+                <p class="text-gray-600">Here's how the expenses should be split</p>
             </div>
 
-            <table class="w-full text-sm border mt-4" id="settlementTable">
-                <thead class="bg-gray-200">
-                    <tr>
-                        <th class="border p-2">Person</th>
-                        <th class="border p-2">Paid</th>
-                        <th class="border p-2">Share</th>
-                        <th class="border p-2">Balance</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
+            <div class="flex flex-col sm:flex-row justify-between items-center gap-4 bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-xl">
+                <div id="totalPaid" class="text-lg font-semibold text-gray-700"></div>
+                <div class="relative">
+                    <select id="categoryFilter" onchange="calculateSettlement()" 
+                            class="border-2 border-gray-200 rounded-xl p-3 pr-10 input-focus bg-white font-medium appearance-none cursor-pointer">
+                        <option value="all">All Categories</option>
+                    </select>
+                    <i class="fas fa-filter absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+                </div>
+            </div>
 
-            <h3 class="text-lg font-semibold text-center mt-6">Who Owes Whom</h3>
-            <ul id="owedList" class="list-disc list-inside text-sm"></ul>
+            <div class="overflow-x-auto rounded-xl shadow-lg">
+                <table class="w-full text-sm bg-white" id="settlementTable">
+                    <thead class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
+                        <tr>
+                            <th class="p-4 text-left font-semibold">
+                                <i class="fas fa-user mr-2"></i>Person
+                            </th>
+                            <th class="p-4 text-left font-semibold">
+                                <i class="fas fa-credit-card mr-2"></i>Paid
+                            </th>
+                            <th class="p-4 text-left font-semibold">
+                                <i class="fas fa-pie-chart mr-2"></i>Share
+                            </th>
+                            <th class="p-4 text-left font-semibold">
+                                <i class="fas fa-balance-scale mr-2"></i>Balance
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100"></tbody>
+                </table>
+            </div>
+
+            <div class="bg-gradient-to-r from-amber-50 to-orange-50 p-6 rounded-xl">
+                <h3 class="text-xl font-bold text-center mb-4 text-gray-700 flex items-center justify-center">
+                    <i class="fas fa-exchange-alt mr-2 text-amber-600"></i>
+                    Who Owes Whom
+                </h3>
+                <ul id="owedList" class="space-y-2"></ul>
+            </div>
         </section>
 
         <!-- ====== Action Buttons ====== -->
-        <footer id="actionButtons" class="hidden flex justify-between pt-4 relative">
+        <footer id="actionButtons" class="hidden flex flex-col sm:flex-row justify-center gap-4 pt-6 relative fade-in">
             <div class="relative">
                 <button onclick="toggleDropdown('downloadMenu')"
-                    class="bg-blue-500 hover:bg-blue-600 text-white rounded-lg px-4 py-2">Download ▼</button>
+                    class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl px-6 py-4 btn-hover shadow-lg font-semibold">
+                    <i class="fas fa-download mr-2"></i>
+                    Download <i class="fas fa-chevron-down ml-2"></i>
+                </button>
                 <div id="downloadMenu"
-                    class="absolute bottom-full mb-2 hidden bg-white border rounded-lg shadow-lg z-10">
-                    <button onclick="downloadCSV()" class="block px-4 py-2 hover:bg-gray-100 w-full text-left">CSV</button>
-                    <button onclick="downloadPDF()" class="block px-4 py-2 hover:bg-gray-100 w-full text-left">PDF</button>
+                    class="absolute bottom-full mb-2 hidden bg-white border-2 border-gray-200 rounded-xl shadow-xl z-10 overflow-hidden">
+                    <button onclick="downloadCSV()" 
+                        class="block px-6 py-3 hover:bg-gray-50 w-full text-left font-medium text-gray-700 transition-colors duration-200 flex items-center">
+                        <i class="fas fa-file-csv mr-2 text-green-600"></i>
+                        Download CSV
+                    </button>
+                    <button onclick="downloadPDF()" 
+                        class="block px-6 py-3 hover:bg-gray-50 w-full text-left font-medium text-gray-700 transition-colors duration-200 flex items-center border-t border-gray-100">
+                        <i class="fas fa-file-pdf mr-2 text-red-600"></i>
+                        Download PDF
+                    </button>
                 </div>
             </div>
 
             <div class="relative">
                 <button onclick="toggleDropdown('shareMenu')"
-                    class="bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg px-4 py-2">Share ▼</button>
+                    class="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white rounded-xl px-6 py-4 btn-hover shadow-lg font-semibold">
+                    <i class="fas fa-share-alt mr-2"></i>
+                    Share <i class="fas fa-chevron-down ml-2"></i>
+                </button>
                 <div id="shareMenu"
-                    class="absolute bottom-full mb-2 left-1/2 transform -translate-x-[60%] hidden bg-white border rounded-lg shadow-lg z-10 w-56 p-4 space-y-3">
-                    <button onclick="generateShareLink()" class="block w-full text-left text-black hover:underline">Copy
-                        Share Link</button>
-                    <button onclick="showQRCode()" class="block w-full text-left text-black hover:underline">Show
-                        QR</button>
-                    <canvas id="qrCodeCanvas" class="mx-auto hidden mt-3"></canvas>
+                    class="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 hidden bg-white border-2 border-gray-200 rounded-xl shadow-xl z-10 w-64 p-4 space-y-3">
+                    <button onclick="generateShareLink()" 
+                        class="block w-full text-left font-medium text-gray-700 hover:text-indigo-600 transition-colors duration-200 flex items-center p-2 rounded-lg hover:bg-gray-50">
+                        <i class="fas fa-link mr-2 text-indigo-600"></i>
+                        Copy Share Link
+                    </button>
+                    <button onclick="showQRCode()" 
+                        class="block w-full text-left font-medium text-gray-700 hover:text-indigo-600 transition-colors duration-200 flex items-center p-2 rounded-lg hover:bg-gray-50">
+                        <i class="fas fa-qrcode mr-2 text-indigo-600"></i>
+                        Show QR Code
+                    </button>
+                    <canvas id="qrCodeCanvas" class="mx-auto hidden mt-3 rounded-lg"></canvas>
                 </div>
             </div>
         </footer>
 
     </main>
 
-    <!-- ====== Developed & Customized by PRIYANSHU KESHARWANI ====== -->
+    <!-- Notification System -->
+    <div id="notification" class="fixed top-4 right-4 z-50 transform translate-x-full transition-transform duration-300 ease-in-out">
+        <div class="bg-white rounded-lg shadow-lg border-l-4 p-4 max-w-sm">
+            <div class="flex items-center">
+                <div id="notificationIcon" class="flex-shrink-0">
+                    <!-- Icon will be inserted here -->
+                </div>
+                <div class="ml-3">
+                    <p id="notificationMessage" class="text-sm font-medium text-gray-700"></p>
+                </div>
+                <button onclick="hideNotification()" class="ml-auto flex-shrink-0 text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====== Enhanced by AI Assistant ====== -->
 
     <script>
         let names = [];
         let currentShareLink = "";
+
+        // Notification System
+        function showNotification(message, type = 'info') {
+            const notification = document.getElementById('notification');
+            const icon = document.getElementById('notificationIcon');
+            const messageEl = document.getElementById('notificationMessage');
+            
+            messageEl.textContent = message;
+            
+            // Set icon and border color based on type
+            switch(type) {
+                case 'success':
+                    icon.innerHTML = '<i class="fas fa-check-circle text-green-500 text-lg"></i>';
+                    notification.querySelector('.border-l-4').className = 'bg-white rounded-lg shadow-lg border-l-4 border-green-500 p-4 max-w-sm';
+                    break;
+                case 'error':
+                    icon.innerHTML = '<i class="fas fa-exclamation-circle text-red-500 text-lg"></i>';
+                    notification.querySelector('.border-l-4').className = 'bg-white rounded-lg shadow-lg border-l-4 border-red-500 p-4 max-w-sm';
+                    break;
+                case 'warning':
+                    icon.innerHTML = '<i class="fas fa-exclamation-triangle text-yellow-500 text-lg"></i>';
+                    notification.querySelector('.border-l-4').className = 'bg-white rounded-lg shadow-lg border-l-4 border-yellow-500 p-4 max-w-sm';
+                    break;
+                default:
+                    icon.innerHTML = '<i class="fas fa-info-circle text-blue-500 text-lg"></i>';
+                    notification.querySelector('.border-l-4').className = 'bg-white rounded-lg shadow-lg border-l-4 border-blue-500 p-4 max-w-sm';
+            }
+            
+            // Show notification
+            notification.classList.remove('translate-x-full');
+            notification.classList.add('translate-x-0');
+            
+            // Auto hide after 3 seconds
+            setTimeout(() => {
+                hideNotification();
+            }, 3000);
+        }
+
+        function hideNotification() {
+            const notification = document.getElementById('notification');
+            notification.classList.remove('translate-x-0');
+            notification.classList.add('translate-x-full');
+        }
+
+        // Dark Mode Toggle
+        function toggleDarkMode() {
+            const html = document.documentElement;
+            const toggle = document.getElementById('darkModeToggle');
+            const icon = toggle.querySelector('i');
+            
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                icon.className = 'fas fa-moon text-gray-600';
+                localStorage.setItem('darkMode', 'false');
+                showNotification('Light mode activated', 'info');
+            } else {
+                html.classList.add('dark');
+                icon.className = 'fas fa-sun text-yellow-400';
+                localStorage.setItem('darkMode', 'true');
+                showNotification('Dark mode activated', 'info');
+            }
+        }
+
+        // Initialize dark mode on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const darkMode = localStorage.getItem('darkMode');
+            const html = document.documentElement;
+            const toggle = document.getElementById('darkModeToggle');
+            const icon = toggle.querySelector('i');
+            
+            if (darkMode === 'true' || (!darkMode && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                html.classList.add('dark');
+                icon.className = 'fas fa-sun text-yellow-400';
+            }
+        });
 
         function toggleDropdown(id) {
             document.getElementById('downloadMenu').classList.add('hidden');
@@ -132,12 +383,25 @@
 
         function generateNameInputs() {
             const count = parseInt(document.getElementById('peopleCount').value);
+            if (!count || count < 1 || count > 20) {
+                showNotification('Please enter a valid number of people (1-20)', 'error');
+                return;
+            }
+            
             const nameFields = document.getElementById('nameFields');
             nameFields.innerHTML = '';
             for (let i = 0; i < count; i++) {
-                nameFields.innerHTML += `<input type="text" class="w-full border rounded-lg p-2" placeholder="Person ${i + 1} Name" required>`;
+                nameFields.innerHTML += `
+                    <div class="relative">
+                        <input type="text" 
+                               class="w-full border-2 border-gray-200 rounded-xl p-4 pl-12 input-focus bg-white text-gray-700 font-medium" 
+                               placeholder="Enter name for person ${i + 1}" 
+                               required>
+                        <i class="fas fa-user absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                    </div>`;
             }
             document.getElementById('namesForm').classList.remove('hidden');
+            showNotification('Great! Now enter the names of all participants', 'success');
         }
 
         function generatePurposeInputs() {
@@ -152,29 +416,73 @@
         function addPurposeBox() {
             const purposeFields = document.getElementById('purposeFields');
             const box = document.createElement('div');
-            box.className = "border rounded-lg p-3 bg-gray-50";
+            box.className = "border-2 border-gray-200 rounded-xl p-6 bg-gradient-to-r from-gray-50 to-white shadow-md slide-in";
 
-            let html = `<div class="flex items-center mb-2">
-            <input type="text" class="flex-1 border rounded-lg p-2 mr-2 purpose" placeholder="Purpose e.g. Food, Travel" required>
-            <select class="category border rounded-lg p-2 mr-2">
-                <option value="Food">Food 🍽️</option>
-                <option value="Travel">Travel 🚗</option>
-                <option value="Shopping">Shopping 🛍️</option>
-                <option value="Hotel">Hotel 🏨</option>
-                <option value="Other">Other ✏️</option>
-            </select>
-            <button type="button" onclick="removePurpose(this)" class="text-red-500 hover:text-red-700 text-xl">🗑️</button>
-            </div><div class="grid grid-cols-${names.length} gap-2">`;
+            let html = `
+                <div class="flex flex-col sm:flex-row items-center gap-3 mb-4">
+                    <div class="relative flex-1">
+                        <input type="text" 
+                               class="w-full border-2 border-gray-200 rounded-xl p-3 pl-12 input-focus purpose font-medium" 
+                               placeholder="What was this expense for? (e.g. Dinner, Taxi)" 
+                               required>
+                        <i class="fas fa-tag absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                    </div>
+                    <div class="relative">
+                        <select class="category border-2 border-gray-200 rounded-xl p-3 pr-10 input-focus font-medium appearance-none cursor-pointer bg-white">
+                            <option value="Food">🍽️ Food & Dining</option>
+                            <option value="Travel">🚗 Transportation</option>
+                            <option value="Shopping">🛍️ Shopping</option>
+                            <option value="Hotel">🏨 Accommodation</option>
+                            <option value="Entertainment">🎬 Entertainment</option>
+                            <option value="Other">✏️ Other</option>
+                        </select>
+                        <i class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+                    </div>
+                    <button type="button" onclick="removePurpose(this)" 
+                            class="text-red-500 hover:text-red-700 p-2 rounded-lg hover:bg-red-50 transition-colors duration-200">
+                        <i class="fas fa-trash text-lg"></i>
+                    </button>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block mb-3 text-sm font-semibold text-gray-700">
+                        <i class="fas fa-money-bill-wave mr-2 text-green-600"></i>
+                        How much did each person pay?
+                    </label>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-${Math.min(names.length, 3)} gap-3">`;
 
             names.forEach(name => {
-                html += `<input type="number" class="w-full border rounded-lg p-2 amount" placeholder="${name} paid" required>`;
+                html += `
+                    <div class="relative">
+                        <input type="number" 
+                               class="w-full border-2 border-gray-200 rounded-xl p-3 pl-4 input-focus amount font-medium" 
+                               placeholder="${name}" 
+                               min="0" 
+                               step="0.01">
+                        <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm">₹</span>
+                    </div>`;
             });
 
-            html += `</div><div class="mb-2"><label class="font-semibold">Who is involved?</label><div class="grid grid-cols-2 md:grid-cols-4 gap-2 mt-1 involved">`;
+            html += `
+                    </div>
+                </div>
+                
+                <div class="border-t border-gray-200 pt-4">
+                    <label class="block mb-3 text-sm font-semibold text-gray-700">
+                        <i class="fas fa-users mr-2 text-blue-600"></i>
+                        Who should share this expense?
+                    </label>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 involved">`;
+                    
             names.forEach((name, idx) => {
-                html += `<label class="flex items-center space-x-1"><input type="checkbox" data-idx="${idx}" checked> ${name}</label>`;
+                html += `
+                    <label class="flex items-center p-2 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors duration-200">
+                        <input type="checkbox" data-idx="${idx}" checked class="mr-2 text-indigo-600 rounded focus:ring-indigo-500">
+                        <span class="text-sm font-medium text-gray-700">${name}</span>
+                    </label>`;
             });
 
+            html += `</div></div>`;
             box.innerHTML = html;
             purposeFields.appendChild(box);
             updateCategoryFilter();
@@ -197,9 +505,40 @@
         }
 
         function showResult() {
+            // Validate that at least one expense is entered
+            const expenses = document.querySelectorAll('#purposeFields > div');
+            if (expenses.length === 0) {
+                showNotification('Please add at least one expense before calculating', 'warning');
+                return;
+            }
+            
+            // Check if all required fields are filled
+            let hasValidExpense = false;
+            expenses.forEach(expense => {
+                const purpose = expense.querySelector('.purpose').value.trim();
+                const amounts = [...expense.querySelectorAll('.amount')].map(a => parseFloat(a.value) || 0);
+                const totalAmount = amounts.reduce((a, b) => a + b, 0);
+                
+                if (purpose && totalAmount > 0) {
+                    hasValidExpense = true;
+                }
+            });
+            
+            if (!hasValidExpense) {
+                showNotification('Please enter valid expense details with amounts', 'warning');
+                return;
+            }
+            
             document.getElementById('result').classList.remove('hidden');
             document.getElementById('actionButtons').classList.remove('hidden');
             calculateSettlement();
+            showNotification('Settlement calculated successfully!', 'success');
+            
+            // Smooth scroll to results
+            document.getElementById('result').scrollIntoView({ 
+                behavior: 'smooth',
+                block: 'start'
+            });
         }
 
         function calculateSettlement() {
@@ -231,7 +570,21 @@
                 const bal = diff > 0 ? `+${diff.toFixed(2)}` : diff < 0 ? `-${Math.abs(diff).toFixed(2)}` : '0';
                 const status = diff > 0 ? '(Gets)' : diff < 0 ? '(Owes)' : '(Settled)';
                 const color = diff > 0 ? 'text-green-700' : diff < 0 ? 'text-red-700' : 'text-gray-600';
-                tbody.innerHTML += `<tr><td class="border p-2">${name}</td><td class="border p-2">${currency}${totals[idx].toFixed(2)}</td><td class="border p-2">${currency}${shares[idx].toFixed(2)}</td><td class="border p-2 ${color}">${currency}${bal} ${status}</td></tr>`;
+                const bgColor = diff > 0 ? 'bg-green-50' : diff < 0 ? 'bg-red-50' : 'bg-gray-50';
+                const icon = diff > 0 ? '<i class="fas fa-arrow-up mr-1"></i>' : diff < 0 ? '<i class="fas fa-arrow-down mr-1"></i>' : '<i class="fas fa-check mr-1"></i>';
+                tbody.innerHTML += `
+                    <tr class="hover:bg-gray-50 transition-colors duration-200">
+                        <td class="p-4 font-medium text-gray-700">
+                            <i class="fas fa-user-circle mr-2 text-indigo-600"></i>${name}
+                        </td>
+                        <td class="p-4 text-gray-700">${currency}${totals[idx].toFixed(2)}</td>
+                        <td class="p-4 text-gray-700">${currency}${shares[idx].toFixed(2)}</td>
+                        <td class="p-4">
+                            <span class="${color} ${bgColor} px-3 py-1 rounded-full font-semibold text-sm">
+                                ${icon}${currency}${bal} ${status}
+                            </span>
+                        </td>
+                    </tr>`;
             });
 
             calculateOwed(balances, currency);
@@ -249,7 +602,18 @@
                 for (let i = 0; i < creditors.length && owe > 0; i++) {
                     if (creditors[i].amount === 0) continue;
                     let pay = Math.min(owe, creditors[i].amount);
-                    owedList.innerHTML += `<li>${debtor.name} owes ${currency}${pay.toFixed(2)} to ${creditors[i].name}</li>`;
+                    owedList.innerHTML += `
+                        <li class="flex items-center justify-between p-3 bg-white rounded-lg shadow-sm border border-gray-200">
+                            <span class="flex items-center">
+                                <i class="fas fa-user-circle text-red-500 mr-2"></i>
+                                <strong class="text-gray-700">${debtor.name}</strong>
+                                <span class="text-gray-600 mx-2">owes</span>
+                                <span class="font-semibold text-red-600">${currency}${pay.toFixed(2)}</span>
+                                <span class="text-gray-600 mx-2">to</span>
+                                <strong class="text-gray-700">${creditors[i].name}</strong>
+                            </span>
+                            <i class="fas fa-arrow-right text-amber-500"></i>
+                        </li>`;
                     owe -= pay;
                     creditors[i].amount -= pay;
                 }
@@ -257,30 +621,36 @@
         }
 
         function downloadCSV() {
-            let csv = "=== Purpose Summary ===\nPurpose,Category,Paid By,Who is Involved\n";
-            document.querySelectorAll('#purposeFields > div').forEach(p => {
-                const purpose = p.querySelector('.purpose').value;
-                const category = p.querySelector('.category').value;
-                let paidBy = "";
-                [...p.querySelectorAll('.amount')].forEach((amt, idx) => {
-                    const val = parseFloat(amt.value) || 0;
-                    if (val > 0) {
-                        paidBy += `${names[idx]}: ${val}, `;
-                    }
+            try {
+                let csv = "=== Purpose Summary ===\nPurpose,Category,Paid By,Who is Involved\n";
+                document.querySelectorAll('#purposeFields > div').forEach(p => {
+                    const purpose = p.querySelector('.purpose').value;
+                    const category = p.querySelector('.category').value;
+                    let paidBy = "";
+                    [...p.querySelectorAll('.amount')].forEach((amt, idx) => {
+                        const val = parseFloat(amt.value) || 0;
+                        if (val > 0) {
+                            paidBy += `${names[idx]}: ${val}, `;
+                        }
+                    });
+                    paidBy = paidBy.slice(0, -2);
+                    let involved = [...p.querySelectorAll('.involved input')].filter(c => c.checked).map(c => names[c.dataset.idx]).join(", ");
+                    csv += `${purpose},${category},"${paidBy}","${involved}"\n`;
                 });
-                paidBy = paidBy.slice(0, -2);
-                let involved = [...p.querySelectorAll('.involved input')].filter(c => c.checked).map(c => names[c.dataset.idx]).join(", ");
-                csv += `${purpose},${category},"${paidBy}","${involved}"\n`;
-            });
-            csv += "\n=== Final Settlement ===\nName,Paid,Share,Balance\n";
-            document.querySelectorAll('#settlementTable tbody tr').forEach(row => {
-                csv += [...row.children].map(td => td.textContent).join(",") + "\n";
-            });
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = 'bill-settlement.csv';
-            link.click();
+                csv += "\n=== Final Settlement ===\nName,Paid,Share,Balance\n";
+                document.querySelectorAll('#settlementTable tbody tr').forEach(row => {
+                    csv += [...row.children].map(td => td.textContent.replace(/\n/g, ' ').replace(/,/g, ';')).join(",") + "\n";
+                });
+                const blob = new Blob([csv], { type: 'text/csv' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = 'bill-settlement.csv';
+                link.click();
+                showNotification('CSV file downloaded successfully!', 'success');
+                toggleDropdown('downloadMenu');
+            } catch (error) {
+                showNotification('Failed to download CSV. Please try again.', 'error');
+            }
         }
 
         function downloadPDF() {
@@ -355,8 +725,12 @@
 
         function generateShareLink() {
             const link = window.location.href;
-            navigator.clipboard.writeText(link);
-            alert('Link copied to clipboard!');
+            navigator.clipboard.writeText(link).then(() => {
+                showNotification('Share link copied to clipboard!', 'success');
+                toggleDropdown('shareMenu'); // Hide the dropdown
+            }).catch(() => {
+                showNotification('Failed to copy link. Please try again.', 'error');
+            });
         }
 
         function showQRCode() {
