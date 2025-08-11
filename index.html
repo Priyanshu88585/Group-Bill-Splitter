@@ -3,25 +3,39 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Group Bill Splitter - Priyanshu Version</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#10b981" />
+    <title>Group Bill Splitter</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script>tailwind.config = { darkMode: 'class' };</script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+    <style>
+        body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji"; }
+        /* Zebra rows for settlement table */
+        #settlementTable tbody tr:nth-child(even) { background-color: #f8fafc; }
+        .dark #settlementTable tbody tr:nth-child(even) { background-color: #0f172a; }
+    </style>
 </head>
 
-<body class="bg-gray-100 min-h-screen flex items-center justify-center p-5">
+<body class="bg-gradient-to-br from-amber-50 via-white to-emerald-50 dark:from-slate-900 dark:via-slate-950 dark:to-slate-900 min-h-screen p-6 transition-colors">
 
-    <main class="bg-white shadow-2xl rounded-xl p-8 w-full max-w-2xl space-y-6">
+    <main class="relative bg-white/80 dark:bg-slate-900/70 ring-1 ring-black/5 dark:ring-white/10 shadow-xl rounded-2xl p-6 md:p-8 w-full max-w-3xl mx-auto space-y-6">
 
         <!-- ====== Header ====== -->
-        <header>
-            <h1 class="text-2xl font-bold text-center text-orange-500">Group Bill Splitter</h1>
+        <header class="relative">
+            <button type="button" onclick="toggleTheme()" class="absolute right-0 -top-2 inline-flex items-center gap-2 rounded-full border border-slate-200 dark:border-slate-700 px-3 py-1.5 text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition">🌙</button>
+            <h1 class="text-3xl md:text-4xl font-bold text-center tracking-tight text-emerald-600 dark:text-emerald-400">Group Bill Splitter</h1>
+            <p class="mt-1 text-center text-sm text-slate-600 dark:text-slate-300">Split expenses fairly among friends</p>
         </header>
 
         <!-- ====== Currency Selector ====== -->
         <section>
-            <label class="block mb-1">Select Currency:</label>
-            <select id="currency" class="w-full border rounded-lg p-2">
+            <label class="block mb-1 font-medium text-slate-700 dark:text-slate-200">Select Currency</label>
+            <select id="currency" class="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 p-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/70 transition">
                 <option value="₹">₹ - INR</option>
                 <option value="$">$ - USD</option>
                 <option value="€">€ - EUR</option>
@@ -31,18 +45,20 @@
 
         <!-- ====== People Count Input ====== -->
         <section>
-            <label class="block mb-1 mt-3">How many people?</label>
-            <input id="peopleCount" type="number" min="1" class="w-full border rounded-lg p-2" placeholder="e.g. 3">
-            <button onclick="generateNameInputs()"
-                class="bg-orange-500 hover:bg-orange-600 text-white rounded-lg px-4 py-2 w-full mt-2">Next</button>
+            <label class="block mb-1 mt-3 font-medium text-slate-700 dark:text-slate-200">How many people?</label>
+            <div class="flex items-center gap-2">
+                <button type="button" onclick="decrementPeople()" class="h-10 w-10 rounded-lg border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 transition">−</button>
+                <input id="peopleCount" type="number" min="1" class="flex-1 w-full border border-slate-300 dark:border-slate-700 rounded-lg p-2 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/70" placeholder="e.g. 3">
+                <button type="button" onclick="incrementPeople()" class="h-10 w-10 rounded-lg border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 transition">+</button>
+            </div>
+            <button onclick="generateNameInputs()" class="bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg px-4 py-2 w-full mt-2 transition">Next</button>
         </section>
 
         <!-- ====== Names Input ====== -->
         <section>
             <form id="namesForm" class="space-y-3 hidden">
                 <div id="nameFields" class="space-y-3"></div>
-                <button type="button" onclick="generatePurposeInputs()"
-                    class="bg-blue-500 hover:bg-blue-600 text-white rounded-lg px-4 py-2 w-full">Next</button>
+                <button type="button" onclick="generatePurposeInputs()" class="bg-blue-600 hover:bg-blue-700 text-white rounded-lg px-4 py-2 w-full transition">Next</button>
             </form>
         </section>
 
@@ -50,14 +66,14 @@
         <section>
             <form id="paymentForm" class="space-y-3 hidden">
                 <div class="flex justify-between items-center">
-                    <label class="block font-semibold text-lg">Enter Purpose, Category & Payments</label>
+                    <label class="block font-semibold text-lg text-slate-800 dark:text-slate-100">Enter Purpose, Category & Payments</label>
                 </div>
                 <div id="purposeFields" class="space-y-3"></div>
 
-                 <!-- ====== Buttons in Same Line ====== -->
-                <div class="flex justify-between items-center">
-                    <button type="button" onclick="showResult()"class="bg-green-500 hover:bg-green-600 text-white rounded-lg px-4 py-2 flex-1 mr-2">Show Result</button>
-                    <button type="button" onclick="addPurposeBox()"class="bg-gray-200 hover:bg-gray-300 text-black rounded-full w-10 h-10 flex items-center justify-center text-xl">+</button>
+                <!-- ====== Buttons in Same Line ====== -->
+                <div class="flex justify-between items-center gap-2">
+                    <button type="button" onclick="showResult()" class="bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg px-4 py-2 flex-1 transition">Show Result</button>
+                    <button type="button" onclick="addPurposeBox()" class="bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-black dark:text-white rounded-full w-10 h-10 flex items-center justify-center text-xl transition">+</button>
                 </div>
             </form>
         </section>
@@ -65,52 +81,48 @@
 
         <!-- ====== Result ====== -->
         <section id="result" class="hidden space-y-3">
-            <h2 class="text-xl font-bold text-center text-green-600">Final Settlement</h2>
+            <h2 class="text-xl font-bold text-center text-emerald-600 dark:text-emerald-400">Final Settlement</h2>
 
-            <div class="flex justify-between items-center">
-                <div id="totalPaid" class="text-left"></div>
-                <select id="categoryFilter" onchange="calculateSettlement()" class="border p-2 rounded-lg">
+            <div class="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+                <div id="totalPaid" class="text-left text-slate-800 dark:text-slate-100"></div>
+                <select id="categoryFilter" onchange="calculateSettlement()" class="border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/70 transition">
                     <option value="all">All Categories</option>
                 </select>
             </div>
 
-            <table class="w-full text-sm border mt-4" id="settlementTable">
-                <thead class="bg-gray-200">
-                    <tr>
-                        <th class="border p-2">Person</th>
-                        <th class="border p-2">Paid</th>
-                        <th class="border p-2">Share</th>
-                        <th class="border p-2">Balance</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
+            <div class="overflow-hidden rounded-lg border border-slate-200 dark:border-slate-700 mt-2">
+                <table class="w-full text-sm" id="settlementTable">
+                    <thead class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200">
+                        <tr>
+                            <th class="border border-slate-200 dark:border-slate-700 p-2">Person</th>
+                            <th class="border border-slate-200 dark:border-slate-700 p-2">Paid</th>
+                            <th class="border border-slate-200 dark:border-slate-700 p-2">Share</th>
+                            <th class="border border-slate-200 dark:border-slate-700 p-2">Balance</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
 
-            <h3 class="text-lg font-semibold text-center mt-6">Who Owes Whom</h3>
-            <ul id="owedList" class="list-disc list-inside text-sm"></ul>
+            <h3 class="text-lg font-semibold text-center mt-6 text-slate-800 dark:text-slate-100">Who Owes Whom</h3>
+            <ul id="owedList" class="list-disc list-inside text-sm text-slate-800 dark:text-slate-100"></ul>
         </section>
 
         <!-- ====== Action Buttons ====== -->
         <footer id="actionButtons" class="hidden flex justify-between pt-4 relative">
             <div class="relative">
-                <button onclick="toggleDropdown('downloadMenu')"
-                    class="bg-blue-500 hover:bg-blue-600 text-white rounded-lg px-4 py-2">Download ▼</button>
-                <div id="downloadMenu"
-                    class="absolute bottom-full mb-2 hidden bg-white border rounded-lg shadow-lg z-10">
-                    <button onclick="downloadCSV()" class="block px-4 py-2 hover:bg-gray-100 w-full text-left">CSV</button>
-                    <button onclick="downloadPDF()" class="block px-4 py-2 hover:bg-gray-100 w-full text-left">PDF</button>
+                <button onclick="toggleDropdown('downloadMenu')" class="bg-blue-600 hover:bg-blue-700 text-white rounded-lg px-4 py-2 transition">Download ▼</button>
+                <div id="downloadMenu" class="absolute bottom-full mb-2 hidden bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-lg z-10">
+                    <button onclick="downloadCSV()" class="block px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-700 w-full text-left text-slate-800 dark:text-slate-100">CSV</button>
+                    <button onclick="downloadPDF()" class="block px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-700 w-full text-left text-slate-800 dark:text-slate-100">PDF</button>
                 </div>
             </div>
 
             <div class="relative">
-                <button onclick="toggleDropdown('shareMenu')"
-                    class="bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg px-4 py-2">Share ▼</button>
-                <div id="shareMenu"
-                    class="absolute bottom-full mb-2 left-1/2 transform -translate-x-[60%] hidden bg-white border rounded-lg shadow-lg z-10 w-56 p-4 space-y-3">
-                    <button onclick="generateShareLink()" class="block w-full text-left text-black hover:underline">Copy
-                        Share Link</button>
-                    <button onclick="showQRCode()" class="block w-full text-left text-black hover:underline">Show
-                        QR</button>
+                <button onclick="toggleDropdown('shareMenu')" class="bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg px-4 py-2 transition">Share ▼</button>
+                <div id="shareMenu" class="absolute bottom-full mb-2 left-1/2 transform -translate-x-[60%] hidden bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-lg z-10 w-56 p-4 space-y-3">
+                    <button onclick="generateShareLink()" class="block w-full text-left text-slate-800 dark:text-slate-100 hover:underline">Copy Share Link</button>
+                    <button onclick="showQRCode()" class="block w-full text-left text-slate-800 dark:text-slate-100 hover:underline">Show QR</button>
                     <canvas id="qrCodeCanvas" class="mx-auto hidden mt-3"></canvas>
                 </div>
             </div>
@@ -124,6 +136,38 @@
         let names = [];
         let currentShareLink = "";
 
+        // Theme setup
+        const storedTheme = localStorage.getItem('theme');
+        if (storedTheme === 'dark' || (!storedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        }
+        function toggleTheme() {
+            const isDark = document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        }
+
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'fixed bottom-5 right-5 z-50 rounded-lg bg-emerald-600 text-white px-4 py-2 shadow-lg';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'transition-opacity');
+                setTimeout(() => toast.remove(), 300);
+            }, 1500);
+        }
+
+        function decrementPeople() {
+            const input = document.getElementById('peopleCount');
+            const val = Math.max(1, parseInt(input.value || '1', 10) - 1);
+            input.value = val;
+        }
+        function incrementPeople() {
+            const input = document.getElementById('peopleCount');
+            const val = Math.max(1, parseInt(input.value || '0', 10) + 1);
+            input.value = val;
+        }
+
         function toggleDropdown(id) {
             document.getElementById('downloadMenu').classList.add('hidden');
             document.getElementById('shareMenu').classList.add('hidden');
@@ -135,9 +179,10 @@
             const nameFields = document.getElementById('nameFields');
             nameFields.innerHTML = '';
             for (let i = 0; i < count; i++) {
-                nameFields.innerHTML += `<input type="text" class="w-full border rounded-lg p-2" placeholder="Person ${i + 1} Name" required>`;
+                nameFields.innerHTML += `<input type="text" class="w-full border border-slate-300 dark:border-slate-700 rounded-lg p-2 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/70" placeholder="Person ${i + 1} Name" required>`;
             }
             document.getElementById('namesForm').classList.remove('hidden');
+            document.getElementById('namesForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
         function generatePurposeInputs() {
@@ -147,32 +192,33 @@
             document.getElementById('purposeFields').innerHTML = '';
             addPurposeBox();
             document.getElementById('paymentForm').classList.remove('hidden');
+            document.getElementById('paymentForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
         function addPurposeBox() {
             const purposeFields = document.getElementById('purposeFields');
             const box = document.createElement('div');
-            box.className = "border rounded-lg p-3 bg-gray-50";
+            box.className = "border border-slate-200 dark:border-slate-700 rounded-xl p-3 bg-slate-50 dark:bg-slate-800";
 
             let html = `<div class="flex items-center mb-2">
-            <input type="text" class="flex-1 border rounded-lg p-2 mr-2 purpose" placeholder="Purpose e.g. Food, Travel" required>
-            <select class="category border rounded-lg p-2 mr-2">
+            <input type="text" class="flex-1 border border-slate-300 dark:border-slate-700 rounded-lg p-2 mr-2 purpose bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/70" placeholder="Purpose e.g. Food, Travel" required>
+            <select class="category border border-slate-300 dark:border-slate-700 rounded-lg p-2 mr-2 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/70">
                 <option value="Food">Food 🍽️</option>
                 <option value="Travel">Travel 🚗</option>
                 <option value="Shopping">Shopping 🛍️</option>
                 <option value="Hotel">Hotel 🏨</option>
                 <option value="Other">Other ✏️</option>
             </select>
-            <button type="button" onclick="removePurpose(this)" class="text-red-500 hover:text-red-700 text-xl">🗑️</button>
+            <button type="button" onclick="removePurpose(this)" class="text-red-600 hover:text-red-700 text-xl">🗑️</button>
             </div><div class="grid grid-cols-${names.length} gap-2">`;
 
             names.forEach(name => {
-                html += `<input type="number" class="w-full border rounded-lg p-2 amount" placeholder="${name} paid" required>`;
+                html += `<input type="number" class="w-full border border-slate-300 dark:border-slate-700 rounded-lg p-2 amount bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/70" placeholder="${name} paid" required>`;
             });
 
-            html += `</div><div class="mb-2"><label class="font-semibold">Who is involved?</label><div class="grid grid-cols-2 md:grid-cols-4 gap-2 mt-1 involved">`;
+            html += `</div><div class="mb-2"><label class="font-semibold text-slate-800 dark:text-slate-100">Who is involved?</label><div class="grid grid-cols-2 md:grid-cols-4 gap-2 mt-1 involved">`;
             names.forEach((name, idx) => {
-                html += `<label class="flex items-center space-x-1"><input type="checkbox" data-idx="${idx}" checked> ${name}</label>`;
+                html += `<label class="flex items-center gap-2 text-slate-800 dark:text-slate-100"><input type="checkbox" data-idx="${idx}" checked> ${name}</label>`;
             });
 
             box.innerHTML = html;
@@ -200,6 +246,7 @@
             document.getElementById('result').classList.remove('hidden');
             document.getElementById('actionButtons').classList.remove('hidden');
             calculateSettlement();
+            document.getElementById('result').scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
         function calculateSettlement() {
@@ -230,8 +277,8 @@
                 balances.push({ name: name, amount: diff });
                 const bal = diff > 0 ? `+${diff.toFixed(2)}` : diff < 0 ? `-${Math.abs(diff).toFixed(2)}` : '0';
                 const status = diff > 0 ? '(Gets)' : diff < 0 ? '(Owes)' : '(Settled)';
-                const color = diff > 0 ? 'text-green-700' : diff < 0 ? 'text-red-700' : 'text-gray-600';
-                tbody.innerHTML += `<tr><td class="border p-2">${name}</td><td class="border p-2">${currency}${totals[idx].toFixed(2)}</td><td class="border p-2">${currency}${shares[idx].toFixed(2)}</td><td class="border p-2 ${color}">${currency}${bal} ${status}</td></tr>`;
+                const color = diff > 0 ? 'text-green-700 dark:text-green-400' : diff < 0 ? 'text-red-700 dark:text-red-400' : 'text-slate-600 dark:text-slate-300';
+                tbody.innerHTML += `<tr><td class="border border-slate-200 dark:border-slate-700 p-2">${name}</td><td class="border border-slate-200 dark:border-slate-700 p-2">${currency}${totals[idx].toFixed(2)}</td><td class="border border-slate-200 dark:border-slate-700 p-2">${currency}${shares[idx].toFixed(2)}</td><td class="border border-slate-200 dark:border-slate-700 p-2 ${color}">${currency}${bal} ${status}</td></tr>`;
             });
 
             calculateOwed(balances, currency);
@@ -281,6 +328,7 @@
             link.href = URL.createObjectURL(blob);
             link.download = 'bill-settlement.csv';
             link.click();
+            showToast('CSV downloaded');
         }
 
         function downloadPDF() {
@@ -351,12 +399,13 @@
                 jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
             };
             html2pdf().set(opt).from(element).save();
+            showToast('PDF generated');
         }
 
         function generateShareLink() {
             const link = window.location.href;
             navigator.clipboard.writeText(link);
-            alert('Link copied to clipboard!');
+            showToast('Link copied to clipboard');
         }
 
         function showQRCode() {
