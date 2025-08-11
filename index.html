@@ -32,7 +32,7 @@
         <!-- ====== People Count Input ====== -->
         <section>
             <label class="block mb-1 mt-3">How many people?</label>
-            <input id="peopleCount" type="number" min="1" class="w-full border rounded-lg p-2" placeholder="e.g. 3">
+            <input id="peopleCount" type="number" min="1" max="20" class="w-full border rounded-lg p-2" placeholder="e.g. 3">
             <button onclick="generateNameInputs()"
                 class="bg-orange-500 hover:bg-orange-600 text-white rounded-lg px-4 py-2 w-full mt-2">Next</button>
         </section>
@@ -56,8 +56,8 @@
 
                  <!-- ====== Buttons in Same Line ====== -->
                 <div class="flex justify-between items-center">
-                    <button type="button" onclick="showResult()"class="bg-green-500 hover:bg-green-600 text-white rounded-lg px-4 py-2 flex-1 mr-2">Show Result</button>
-                    <button type="button" onclick="addPurposeBox()"class="bg-gray-200 hover:bg-gray-300 text-black rounded-full w-10 h-10 flex items-center justify-center text-xl">+</button>
+                    <button type="button" onclick="showResult()" class="bg-green-500 hover:bg-green-600 text-white rounded-lg px-4 py-2 flex-1 mr-2">Show Result</button>
+                    <button type="button" onclick="addPurposeBox()" class="bg-gray-200 hover:bg-gray-300 text-black rounded-full w-10 h-10 flex items-center justify-center text-xl">+</button>
                 </div>
             </form>
         </section>
@@ -132,6 +132,13 @@
 
         function generateNameInputs() {
             const count = parseInt(document.getElementById('peopleCount').value);
+            
+            // Validate people count
+            if (isNaN(count) || count < 1 || count > 20) {
+                alert('Please enter a valid number of people (1-20)');
+                return;
+            }
+            
             const nameFields = document.getElementById('nameFields');
             nameFields.innerHTML = '';
             for (let i = 0; i < count; i++) {
@@ -143,7 +150,22 @@
         function generatePurposeInputs() {
             const inputs = document.querySelectorAll('#nameFields input');
             names = [];
-            inputs.forEach(input => names.push(input.value.trim() || "Unnamed Person"));
+            let hasEmptyNames = false;
+            
+            inputs.forEach((input, index) => {
+                const name = input.value.trim();
+                if (!name) {
+                    hasEmptyNames = true;
+                    names.push(`Person ${index + 1}`);
+                } else {
+                    names.push(name);
+                }
+            });
+            
+            if (hasEmptyNames) {
+                alert('Some names were empty and have been filled with default names. Please verify the names are correct.');
+            }
+            
             document.getElementById('purposeFields').innerHTML = '';
             addPurposeBox();
             document.getElementById('paymentForm').classList.remove('hidden');
@@ -154,6 +176,7 @@
             const box = document.createElement('div');
             box.className = "border rounded-lg p-3 bg-gray-50";
 
+            // Use flexbox instead of grid-cols for better compatibility
             let html = `<div class="flex items-center mb-2">
             <input type="text" class="flex-1 border rounded-lg p-2 mr-2 purpose" placeholder="Purpose e.g. Food, Travel" required>
             <select class="category border rounded-lg p-2 mr-2">
@@ -164,10 +187,10 @@
                 <option value="Other">Other ✏️</option>
             </select>
             <button type="button" onclick="removePurpose(this)" class="text-red-500 hover:text-red-700 text-xl">🗑️</button>
-            </div><div class="grid grid-cols-${names.length} gap-2">`;
+            </div><div class="flex flex-wrap gap-2">`;
 
             names.forEach(name => {
-                html += `<input type="number" class="w-full border rounded-lg p-2 amount" placeholder="${name} paid" required>`;
+                html += `<input type="number" class="flex-1 min-w-0 border rounded-lg p-2 amount" placeholder="${name} paid" step="0.01" min="0">`;
             });
 
             html += `</div><div class="mb-2"><label class="font-semibold">Who is involved?</label><div class="grid grid-cols-2 md:grid-cols-4 gap-2 mt-1 involved">`;
@@ -197,6 +220,32 @@
         }
 
         function showResult() {
+            // Validate that at least one purpose box exists
+            const purposeBoxes = document.querySelectorAll('#purposeFields > div');
+            if (purposeBoxes.length === 0) {
+                alert('Please add at least one purpose/expense before calculating the result.');
+                return;
+            }
+            
+            // Validate that at least one purpose box has valid data
+            let hasValidData = false;
+            for (let box of purposeBoxes) {
+                const purpose = box.querySelector('.purpose').value.trim();
+                const amounts = [...box.querySelectorAll('.amount')];
+                const hasAmount = amounts.some(amt => parseFloat(amt.value) > 0);
+                const hasInvolved = [...box.querySelectorAll('.involved input')].some(c => c.checked);
+                
+                if (purpose && hasAmount && hasInvolved) {
+                    hasValidData = true;
+                    break;
+                }
+            }
+            
+            if (!hasValidData) {
+                alert('Please ensure at least one expense has a purpose, amount paid, and involved people selected.');
+                return;
+            }
+            
             document.getElementById('result').classList.remove('hidden');
             document.getElementById('actionButtons').classList.remove('hidden');
             calculateSettlement();
@@ -215,7 +264,11 @@
                 const involved = [...p.querySelectorAll('.involved input')].filter(c => c.checked).map(c => parseInt(c.dataset.idx));
                 const amounts = [...p.querySelectorAll('.amount')].map(a => parseFloat(a.value) || 0);
                 const totalPaid = amounts.reduce((a, b) => a + b, 0);
-                involved.forEach(i => shares[i] += totalPaid / involved.length);
+                
+                // Only split if there are involved people and total paid > 0
+                if (involved.length > 0 && totalPaid > 0) {
+                    involved.forEach(i => shares[i] += totalPaid / involved.length);
+                }
                 amounts.forEach((amt, i) => totals[i] += amt);
             });
 
@@ -284,8 +337,9 @@
         }
 
         function downloadPDF() {
-            const currency = document.getElementById('currency').value;
-            const element = document.createElement('div');
+            try {
+                const currency = document.getElementById('currency').value;
+                const element = document.createElement('div');
             element.style.padding = "20px";
             element.style.fontFamily = "Arial, sans-serif";
             element.style.fontSize = "12px";
@@ -343,30 +397,48 @@
                 <ul style="padding-left:15px;">
                     ${document.getElementById('owedList').innerHTML}
                 </ul>`;
-            const opt = {
-                margin: 0.5,
-                filename: 'Group-Bill-Settlement.pdf',
-                image: { type: 'jpeg', quality: 1 },
-                html2canvas: { scale: 2 },
-                jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
-            };
-            html2pdf().set(opt).from(element).save();
+                const opt = {
+                    margin: 0.5,
+                    filename: 'Group-Bill-Settlement.pdf',
+                    image: { type: 'jpeg', quality: 1 },
+                    html2canvas: { scale: 2 },
+                    jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+                };
+                html2pdf().set(opt).from(element).save();
+            } catch (error) {
+                console.error('Failed to generate PDF:', error);
+                alert('Failed to generate PDF. Please try again or use CSV download instead.');
+            }
         }
 
         function generateShareLink() {
             const link = window.location.href;
-            navigator.clipboard.writeText(link);
-            alert('Link copied to clipboard!');
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(link).then(() => {
+                    alert('Link copied to clipboard!');
+                }).catch(err => {
+                    console.error('Failed to copy link:', err);
+                    prompt('Copy this link manually:', link);
+                });
+            } else {
+                // Fallback for older browsers
+                prompt('Copy this link manually:', link);
+            }
         }
 
         function showQRCode() {
-            const canvas = document.getElementById('qrCodeCanvas');
-            const qr = new QRious({
-                element: canvas,
-                value: window.location.href,
-                size: 150
-            });
-            canvas.classList.remove('hidden');
+            try {
+                const canvas = document.getElementById('qrCodeCanvas');
+                const qr = new QRious({
+                    element: canvas,
+                    value: window.location.href,
+                    size: 150
+                });
+                canvas.classList.remove('hidden');
+            } catch (error) {
+                console.error('Failed to generate QR code:', error);
+                alert('Failed to generate QR code. Please try copying the link instead.');
+            }
         }
 
         document.addEventListener('click', function (event) {
@@ -376,8 +448,7 @@
                 document.getElementById('downloadMenu').classList.add('hidden');
                 document.getElementById('shareMenu').classList.add('hidden');
             }
-        }
-);
+        });
     </script>
 </body>
 
