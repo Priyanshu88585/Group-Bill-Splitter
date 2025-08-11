@@ -56,8 +56,8 @@
 
                  <!-- ====== Buttons in Same Line ====== -->
                 <div class="flex justify-between items-center">
-                    <button type="button" onclick="showResult()"class="bg-green-500 hover:bg-green-600 text-white rounded-lg px-4 py-2 flex-1 mr-2">Show Result</button>
-                    <button type="button" onclick="addPurposeBox()"class="bg-gray-200 hover:bg-gray-300 text-black rounded-full w-10 h-10 flex items-center justify-center text-xl">+</button>
+                    <button type="button" onclick="showResult()" class="bg-green-500 hover:bg-green-600 text-white rounded-lg px-4 py-2 flex-1 mr-2">Show Result</button>
+                    <button type="button" onclick="addPurposeBox()" class="bg-gray-200 hover:bg-gray-300 text-black rounded-full w-10 h-10 flex items-center justify-center text-xl">+</button>
                 </div>
             </form>
         </section>
@@ -92,6 +92,8 @@
 
         <!-- ====== Action Buttons ====== -->
         <footer id="actionButtons" class="hidden flex justify-between pt-4 relative">
+            <button onclick="resetApp()" class="bg-red-500 hover:bg-red-600 text-white rounded-lg px-4 py-2">Reset</button>
+            
             <div class="relative">
                 <button onclick="toggleDropdown('downloadMenu')"
                     class="bg-blue-500 hover:bg-blue-600 text-white rounded-lg px-4 py-2">Download ▼</button>
@@ -132,6 +134,10 @@
 
         function generateNameInputs() {
             const count = parseInt(document.getElementById('peopleCount').value);
+            if (isNaN(count) || count < 1 || count > 20) {
+                alert('Please enter a valid number of people (1-20)');
+                return;
+            }
             const nameFields = document.getElementById('nameFields');
             nameFields.innerHTML = '';
             for (let i = 0; i < count; i++) {
@@ -143,7 +149,18 @@
         function generatePurposeInputs() {
             const inputs = document.querySelectorAll('#nameFields input');
             names = [];
-            inputs.forEach(input => names.push(input.value.trim() || "Unnamed Person"));
+            inputs.forEach(input => {
+                const name = input.value.trim();
+                if (name) {
+                    names.push(name);
+                } else {
+                    names.push("Unnamed Person");
+                }
+            });
+            if (names.length === 0) {
+                alert('Please enter at least one name');
+                return;
+            }
             document.getElementById('purposeFields').innerHTML = '';
             addPurposeBox();
             document.getElementById('paymentForm').classList.remove('hidden');
@@ -167,7 +184,7 @@
             </div><div class="grid grid-cols-${names.length} gap-2">`;
 
             names.forEach(name => {
-                html += `<input type="number" class="w-full border rounded-lg p-2 amount" placeholder="${name} paid" required>`;
+                html += `<input type="number" min="0" step="0.01" class="w-full border rounded-lg p-2 amount" placeholder="${name} paid" required>`;
             });
 
             html += `</div><div class="mb-2"><label class="font-semibold">Who is involved?</label><div class="grid grid-cols-2 md:grid-cols-4 gap-2 mt-1 involved">`;
@@ -197,12 +214,46 @@
         }
 
         function showResult() {
+            // Validate that there's at least one purpose entry
+            const purposeFields = document.querySelectorAll('#purposeFields > div');
+            if (purposeFields.length === 0) {
+                alert('Please add at least one purpose/payment entry');
+                return;
+            }
+            
+            // Validate that all required fields are filled
+            let isValid = true;
+            purposeFields.forEach(p => {
+                const purpose = p.querySelector('.purpose').value.trim();
+                const amounts = [...p.querySelectorAll('.amount')].map(a => parseFloat(a.value) || 0);
+                const totalAmount = amounts.reduce((a, b) => a + b, 0);
+                
+                if (!purpose) {
+                    alert('Please fill in all purpose fields');
+                    isValid = false;
+                    return;
+                }
+                
+                if (totalAmount === 0) {
+                    alert('Please enter at least one payment amount');
+                    isValid = false;
+                    return;
+                }
+            });
+            
+            if (!isValid) return;
+            
             document.getElementById('result').classList.remove('hidden');
             document.getElementById('actionButtons').classList.remove('hidden');
             calculateSettlement();
         }
 
         function calculateSettlement() {
+            if (!names || names.length === 0) {
+                console.error('No names available for calculation');
+                return;
+            }
+            
             const currency = document.getElementById('currency').value;
             const selectedCategory = document.getElementById('categoryFilter').value;
             let totals = Array(names.length).fill(0);
@@ -213,10 +264,22 @@
                 if (selectedCategory !== "all" && category !== selectedCategory) return;
 
                 const involved = [...p.querySelectorAll('.involved input')].filter(c => c.checked).map(c => parseInt(c.dataset.idx));
+                if (involved.length === 0) return; // Skip if no one is involved
+                
                 const amounts = [...p.querySelectorAll('.amount')].map(a => parseFloat(a.value) || 0);
                 const totalPaid = amounts.reduce((a, b) => a + b, 0);
-                involved.forEach(i => shares[i] += totalPaid / involved.length);
-                amounts.forEach((amt, i) => totals[i] += amt);
+                if (totalPaid <= 0) return; // Skip if no payment was made
+                
+                involved.forEach(i => {
+                    if (i >= 0 && i < names.length) {
+                        shares[i] += totalPaid / involved.length;
+                    }
+                });
+                amounts.forEach((amt, i) => {
+                    if (i < names.length) {
+                        totals[i] += amt;
+                    }
+                });
             });
 
             const tbody = document.querySelector('#settlementTable tbody');
@@ -284,11 +347,17 @@
         }
 
         function downloadPDF() {
-            const currency = document.getElementById('currency').value;
-            const element = document.createElement('div');
-            element.style.padding = "20px";
-            element.style.fontFamily = "Arial, sans-serif";
-            element.style.fontSize = "12px";
+            try {
+                if (typeof html2pdf === 'undefined') {
+                    alert('PDF library not loaded. Please refresh the page.');
+                    return;
+                }
+                
+                const currency = document.getElementById('currency').value;
+                const element = document.createElement('div');
+                element.style.padding = "20px";
+                element.style.fontFamily = "Arial, sans-serif";
+                element.style.fontSize = "12px";
             let purposeTable = `
             <h3 style="margin-bottom:10px;">Purpose Summary</h3>
             <table style="width:100%; border-collapse:collapse; margin-bottom:20px;">
@@ -351,22 +420,84 @@
                 jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
             };
             html2pdf().set(opt).from(element).save();
+            } catch (error) {
+                console.error('Error generating PDF:', error);
+                alert('Failed to generate PDF. Please try again.');
+            }
         }
 
         function generateShareLink() {
             const link = window.location.href;
-            navigator.clipboard.writeText(link);
-            alert('Link copied to clipboard!');
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(link).then(() => {
+                    alert('Link copied to clipboard!');
+                }).catch(err => {
+                    console.error('Failed to copy link: ', err);
+                    // Fallback for older browsers
+                    const textArea = document.createElement('textarea');
+                    textArea.value = link;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    alert('Link copied to clipboard!');
+                });
+            } else {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = link;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                alert('Link copied to clipboard!');
+            }
         }
 
         function showQRCode() {
-            const canvas = document.getElementById('qrCodeCanvas');
-            const qr = new QRious({
-                element: canvas,
-                value: window.location.href,
-                size: 150
-            });
-            canvas.classList.remove('hidden');
+            try {
+                const canvas = document.getElementById('qrCodeCanvas');
+                if (typeof QRious === 'undefined') {
+                    alert('QR code library not loaded. Please refresh the page.');
+                    return;
+                }
+                const qr = new QRious({
+                    element: canvas,
+                    value: window.location.href,
+                    size: 150
+                });
+                canvas.classList.remove('hidden');
+            } catch (error) {
+                console.error('Error generating QR code:', error);
+                alert('Failed to generate QR code. Please try again.');
+            }
+        }
+
+        function resetApp() {
+            if (confirm('Are you sure you want to reset the application? This will clear all data.')) {
+                // Reset form fields
+                document.getElementById('peopleCount').value = '';
+                document.getElementById('namesForm').classList.add('hidden');
+                document.getElementById('paymentForm').classList.add('hidden');
+                document.getElementById('result').classList.add('hidden');
+                document.getElementById('actionButtons').classList.add('hidden');
+                
+                // Clear arrays and data
+                names = [];
+                currentShareLink = "";
+                
+                // Hide dropdowns
+                document.getElementById('downloadMenu').classList.add('hidden');
+                document.getElementById('shareMenu').classList.add('hidden');
+                document.getElementById('qrCodeCanvas').classList.add('hidden');
+                
+                // Clear all input fields
+                document.getElementById('nameFields').innerHTML = '';
+                document.getElementById('purposeFields').innerHTML = '';
+                
+                // Reset currency to default
+                document.getElementById('currency').value = '₹';
+            }
         }
 
         document.addEventListener('click', function (event) {
@@ -376,8 +507,7 @@
                 document.getElementById('downloadMenu').classList.add('hidden');
                 document.getElementById('shareMenu').classList.add('hidden');
             }
-        }
-);
+        });
     </script>
 </body>
 
