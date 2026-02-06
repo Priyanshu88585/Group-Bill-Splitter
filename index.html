@@ -56,8 +56,8 @@
 
                  <!-- ====== Buttons in Same Line ====== -->
                 <div class="flex justify-between items-center">
-                    <button type="button" onclick="showResult()"class="bg-green-500 hover:bg-green-600 text-white rounded-lg px-4 py-2 flex-1 mr-2">Show Result</button>
-                    <button type="button" onclick="addPurposeBox()"class="bg-gray-200 hover:bg-gray-300 text-black rounded-full w-10 h-10 flex items-center justify-center text-xl">+</button>
+                    <button type="button" onclick="showResult()" class="bg-green-500 hover:bg-green-600 text-white rounded-lg px-4 py-2 flex-1 mr-2">Show Result</button>
+                    <button type="button" onclick="addPurposeBox()" class="bg-gray-200 hover:bg-gray-300 text-black rounded-full w-10 h-10 flex items-center justify-center text-xl">+</button>
                 </div>
             </form>
         </section>
@@ -132,6 +132,10 @@
 
         function generateNameInputs() {
             const count = parseInt(document.getElementById('peopleCount').value);
+            if (!Number.isFinite(count) || count < 1) {
+                alert('Please enter a valid number of people (at least 1).');
+                return;
+            }
             const nameFields = document.getElementById('nameFields');
             nameFields.innerHTML = '';
             for (let i = 0; i < count; i++) {
@@ -164,16 +168,17 @@
                 <option value="Other">Other ✏️</option>
             </select>
             <button type="button" onclick="removePurpose(this)" class="text-red-500 hover:text-red-700 text-xl">🗑️</button>
-            </div><div class="grid grid-cols-${names.length} gap-2">`;
+            </div><div class="grid gap-2" style="grid-template-columns: repeat(${names.length}, minmax(0, 1fr));">`;
 
             names.forEach(name => {
-                html += `<input type="number" class="w-full border rounded-lg p-2 amount" placeholder="${name} paid" required>`;
+                html += `<input type="number" class="w-full border rounded-lg p-2 amount" placeholder="${name} paid" min="0" step="0.01" inputmode="decimal" required>`;
             });
 
             html += `</div><div class="mb-2"><label class="font-semibold">Who is involved?</label><div class="grid grid-cols-2 md:grid-cols-4 gap-2 mt-1 involved">`;
             names.forEach((name, idx) => {
                 html += `<label class="flex items-center space-x-1"><input type="checkbox" data-idx="${idx}" checked> ${name}</label>`;
             });
+            html += `</div></div>`;
 
             box.innerHTML = html;
             purposeFields.appendChild(box);
